@@ -1,197 +1,444 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-br" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <title>Gerenciamento de Rotina</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciamento de Rotina - {{ current_user.username }}</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✅</text></svg>">
-    <style>
-        :root {
-            --bg-body: #f4f7f6; --bg-nav: #ffffff; --bg-card: #ffffff;
-            --text: #2d3436; --border: #dfe6e9; --accent: #0984e3;
-            --s-red: #d63031; --s-yellow: #feca57; --s-green: #1dd1a1;
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        danger: '#EF4444',
+                    }
+                }
+            }
         }
-        [data-theme="dark"] {
-            --bg-body: #1e272e; --bg-nav: #2f3542; --bg-card: #3a444d;
-            --text: #f1f2f6; --border: #4b4b4b; --accent: #70a1ff;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { background: var(--bg-body); color: var(--text); font-family: 'Inter', sans-serif; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
-        nav { background: var(--bg-nav); border-bottom: 1px solid var(--border); box-shadow: 0 2px 10px rgba(0,0,0,0.05); z-index: 10; flex-shrink: 0; }
-        .nav-top { padding: 10px 25px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .nav-controls { padding: 10px 25px; display: flex; gap: 15px; align-items: center; background: rgba(0,0,0,0.02); }
-        .prog-geral { height: 6px; background: #dfe6e9; position: relative; }
-        .prog-geral-fill { height: 100%; background: var(--s-green); transition: width 0.6s; }
-        main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .content-grid { flex: 1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; padding: 20px; min-height: 0; }
-        .column { background: var(--bg-nav); border-radius: 12px; border: 1px solid var(--border); display: flex; flex-direction: column; overflow: hidden; }
-        .col-scroll { flex: 1; overflow-y: auto; padding: 15px; }
-        .card { background: var(--bg-card); padding: 12px; margin-bottom: 12px; border-radius: 10px; border: 1px solid var(--border); border-left: 6px solid #ccc; position: relative; }
-        .status-Pendente { border-left-color: var(--s-red); }
-        .status-Em-andamento { border-left-color: var(--s-yellow); }
-        .status-Concluído { border-left-color: var(--s-green); opacity: 0.7; }
-        .bottom-section { height: 200px; display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 0 20px 15px; flex-shrink: 0; }
-        .btn { padding: 8px 15px; border-radius: 6px; border: none; cursor: pointer; font-weight: bold; }
-        .btn-theme { background: var(--bg-card); border: 1px solid var(--border); }
-        .btn-iniciar { background: #6c5ce7; color: white; }
-        .btn-finalizar { background: var(--s-green); color: white; }
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; }
-        .modal-content { background: var(--bg-nav); padding: 30px; border-radius: 15px; width: 450px; }
-        .btn-float { position: fixed; bottom: 25px; right: 25px; width: 60px; height: 60px; border-radius: 50%; background: #0984e3; color: white; border: none; font-size: 2rem; cursor: pointer; z-index: 90; }
-    </style>
+    </script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body data-theme="light">
+<body class="bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-950 dark:to-slate-900 transition-colors duration-300">
+    <nav class="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+        <!-- Top bar -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <span class="text-3xl">✅</span>
+                    <div>
+                        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Rotina</h1>
+                        <p class="text-sm text-slate-500 dark:text-slate-400">{{ current_user.username }}</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="hidden sm:flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 rounded-lg">
+                        <span class="text-sm font-semibold text-secondary">{{ p_geral }}%</span>
+                        <span class="text-xs text-slate-600 dark:text-slate-400">Conclusão</span>
+                    </div>
+                    <button onclick="toggleTheme()" id="theme-btn" class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Alternar tema">
+                        <span class="text-xl">🌙</span>
+                    </button>
+                    <a href="{{ url_for('logout') }}" class="inline-flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-medium rounded-lg transition-colors">
+                        <span>🚪</span>
+                        <span class="hidden sm:inline">Sair</span>
+                    </a>
+                </div>
+            </div>
+        </div>
 
-    <nav>
-        <div class="nav-top">
-            <div style="display:flex; align-items:center; gap:10px;">
-                <span>✅</span>
-                <h1 style="font-size: 1.2rem;">Gerenciamento de Rotina | Guilherme Castro</h1>
-            </div>
-            <div style="display:flex; align-items:center; gap:15px;">
-                <span style="font-weight:bold; color:var(--s-green);">Geral: {{ p_geral }}%</span>
-                <button class="btn btn-theme" onclick="toggleTheme()" id="theme-btn">🌙</button>
+        <!-- Progress bar -->
+        <div class="h-1 w-full bg-slate-200 dark:bg-slate-800">
+            <div class="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-500" style="width: {{ p_geral }}%"></div>
+        </div>
+
+        <!-- Controls bar -->
+        <div class="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-4 sm:px-6 lg:px-8 py-3">
+            <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-wrap">
+                <form action="/" method="GET" class="flex items-center gap-2 flex-1 min-w-max">
+                    <label for="data-input" class="text-sm font-semibold text-slate-600 dark:text-slate-400 whitespace-nowrap">📅 Data:</label>
+                    <input type="date" id="data-input" name="data" value="{{ data_hoje }}" onchange="this.form.submit()" 
+                           class="px-3 py-2 bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                </form>
+                
+                <div class="flex items-center gap-2 flex-wrap">
+                    <a href="/iniciar_turno/{{ data_hoje }}" 
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+                        <span>🚀</span>
+                        <span>Iniciar Turno</span>
+                    </a>
+                    <button onclick="openModal('modal-global')" 
+                            class="inline-flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold rounded-lg transition-colors">
+                        <span>🌍</span>
+                        <span>Globais</span>
+                    </button>
+                    <a href="/finalizar_turno/{{ data_hoje }}" 
+                       class="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-secondary to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-105">
+                        <span>✔️</span>
+                        <span>Finalizar</span>
+                    </a>
+                </div>
             </div>
         </div>
-        <div class="nav-controls">
-            <form action="/" method="GET" style="display:flex; align-items:center; gap:10px;">
-                <input type="date" name="data" value="{{ data_hoje }}" onchange="this.form.submit()">
-            </form>
-            <div style="height: 20px; width: 1px; background: var(--border);"></div>
-            <a href="/iniciar_turno/{{ data_hoje }}"><button class="btn btn-iniciar">🚀 Iniciar Turno (Carregar Rotina)</button></a>
-            <button class="btn" onclick="openModal('modal-global')" style="background:var(--accent); color:white;">🌍 Globais</button>
-            <a href="/finalizar_turno/{{ data_hoje }}"><button class="btn btn-finalizar">✔️ Finalizar Turno</button></a>
-        </div>
-        <div class="prog-geral"><div class="prog-geral-fill" style="width: {{ p_geral }}%;"></div></div>
     </nav>
 
-    <main>
+    <main class="flex-1 overflow-y-auto">
+        <!-- Flash Messages -->
         {% with msgs = get_flashed_messages(with_categories=true) %}
-          {% if msgs %}{% for cat, msg in msgs %}
-            <div style="padding:10px; background:{{ '#2ecc71' if cat == 'success' else '#e74c3c' }}; color:white; text-align:center;">{{ msg }}</div>
-          {% endfor %}{% endif %}
+          {% if msgs %}
+            <div class="fixed top-24 left-1/2 transform -translate-x-1/2 z-40 space-y-2 w-full max-w-md px-4 pointer-events-none">
+              {% for cat, msg in msgs %}
+                <div class="alert-{{ cat }} pointer-events-auto">{{ msg }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
         {% endwith %}
 
-        <div class="content-grid">
-            {% for p in [('Início', p_inicio), ('Meio', p_meio), ('Final', p_final)] %}
-            <div class="column">
-                <div style="padding: 10px; border-bottom: 1px solid var(--border); text-align: center;">
-                    <strong>{{ p[0] }}</strong>
-                    <div style="height:4px; background:#eee; margin-top:5px;"><div style="width:{{ p[1] }}%; height:100%; background:var(--accent);"></div></div>
-                    <small>{{ p[1] }}%</small>
-                </div>
-                <div class="col-scroll">
-                    {% for t in tarefas if t.periodo == p[0] %}
-                    <div class="card status-{{ t.status.replace(' ', '-') }}">
-                        <strong>{{ t.descricao }}</strong> {% if t.recorrente %} <small title="Tarefa da Rotina Fixa">🔄</small> {% endif %}
-                        <div style="margin-top: 10px;">
-                            <a href="/update/tarefa/{{ t.id }}/Pendente" style="text-decoration:none">🔴</a>
-                            <a href="/update/tarefa/{{ t.id }}/Em andamento" style="text-decoration:none">🟡</a>
-                            <a href="/update/tarefa/{{ t.id }}/Concluído" style="text-decoration:none">🟢</a>
-                            <a href="/delete/tarefa/{{ t.id }}" style="float:right; opacity:0.3; text-decoration:none">🗑️</a>
+        <!-- Content Grid -->
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {% for p in [('Início', p_inicio), ('Meio', p_meio), ('Final', p_final)] %}
+                <div class="lg:col-span-1">
+                    <div class="h-full flex flex-col bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow">
+                        <!-- Card Header -->
+                        <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-lg font-bold text-slate-900 dark:text-white">{{ p[0] }} do Turno</h3>
+                                <span class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-primary/10 text-primary font-bold text-sm">{{ p[1] }}%</span>
+                            </div>
+                            <div class="w-full bg-slate-300 dark:bg-slate-700 rounded-full h-2 overflow-hidden">
+                                <div class="h-full bg-gradient-to-r from-primary to-blue-500 transition-all duration-500" style="width: {{ p[1] }}%"></div>
+                            </div>
+                        </div>
+
+                        <!-- Card Content -->
+                        <div class="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+                            {% for t in tarefas if t.periodo == p[0] %}
+                            <div class="group p-4 bg-slate-50 dark:bg-slate-900 rounded-xl border-l-4 border-{{ t.status | replace(' ', '-') }}-color hover:shadow-md transition-all"
+                                 data-status="{{ t.status }}">
+                                <div class="flex items-start justify-between gap-3">
+                                    <div class="flex-1 min-w-0 w-full">
+                                        <h4 class="font-semibold text-slate-900 dark:text-white break-words whitespace-normal">{{ t.descricao }}</h4>
+                                        {% if t.recorrente %}
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">🔄 Rotina Fixa</p>
+                                        {% endif %}
+                                    </div>
+                                    <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                                        <a href="/update/tarefa/{{ t.id }}/Pendente" title="Pendente" class="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors">🔴</a>
+                                        <a href="/update/tarefa/{{ t.id }}/Em andamento" title="Em andamento" class="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors">🟡</a>
+                                        <a href="/update/tarefa/{{ t.id }}/Concluído" title="Concluído" class="p-1.5 hover:bg-white dark:hover:bg-slate-800 rounded-lg transition-colors">🟢</a>
+                                        <a href="/delete/tarefa/{{ t.id }}" title="Deletar" onclick="return confirm('Tem certeza?')" class="p-1.5 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors">🗑️</a>
+                                    </div>
+                                </div>
+                            </div>
+                            {% else %}
+                            <div class="flex items-center justify-center h-32 text-center">
+                                <p class="text-slate-500 dark:text-slate-400 text-sm">Nenhuma tarefa para {{ p[0].lower() }} do turno</p>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
 
-        <div class="bottom-section">
-            <div class="column">
-                <div style="padding:8px; border-bottom:1px solid var(--border); font-weight:bold; font-size:0.8rem;">🖇️ Paralelas</div>
-                <div class="col-scroll">
-                    <form action="/add/paralela" method="POST" style="display:flex; gap:5px; margin-bottom:10px;">
-                        <input type="hidden" name="data" value="{{ data_hoje }}">
-                        <input type="text" name="descricao" placeholder="Adicionar..." required style="flex:1;">
-                        <button type="submit">+</button>
-                    </form>
-                    {% for p in paralelas %}
-                    <div class="card status-{{ p.status.replace(' ', '-') }}" style="padding:8px; margin-bottom:5px;">
-                        {{ p.descricao }} <a href="/update/paralela/{{ p.id }}/Concluído" style="float:right;">✔️</a>
+            <!-- Bottom Section -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <!-- Atividades Paralelas -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">🖇️ Paralelas</h3>
                     </div>
-                    {% endfor %}
+                    <div class="p-4 space-y-3">
+                        <form action="/add/paralela" method="POST" class="flex gap-2">
+                            <input type="hidden" name="data" value="{{ data_hoje }}">
+                            <input type="text" name="descricao" placeholder="Adicionar atividade..." required 
+                                   class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button type="submit" class="px-4 py-2 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">➕</button>
+                        </form>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            {% for p in paralelas %}
+                            <div class="group flex items-start justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-sm transition-shadow">
+                                <span class="text-slate-900 dark:text-white break-words whitespace-normal">{{ p.descricao }}</span>
+                                <a href="/update/paralela/{{ p.id }}/Concluído" title="Marcar como concluída" class="text-lg hover:scale-110 transition-transform flex-shrink-0">✔️</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="column">
-                <div style="padding:8px; border-bottom:1px solid var(--border); font-weight:bold; font-size:0.8rem;">📝 Notas</div>
-                <div class="col-scroll">
-                    <form action="/add/obs" method="POST" style="display:flex; gap:5px; margin-bottom:10px;">
-                        <input type="hidden" name="data" value="{{ data_hoje }}">
-                        <input type="text" name="texto" placeholder="Nova nota..." required style="flex:1;">
-                        <button type="submit">Salvar</button>
-                    </form>
-                    {% for o in obs %}
-                    <div style="background:var(--bg-card); padding:8px; border-radius:6px; margin-bottom:5px; border:1px solid var(--border); font-size:0.85rem;">
-                        {{ o.texto }} <a href="/delete/obs/{{ o.id }}" style="float:right;">✕</a>
+
+                <!-- Notas -->
+                <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow">
+                    <div class="px-6 py-4 bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 border-b border-slate-200 dark:border-slate-700">
+                        <h3 class="text-lg font-bold text-slate-900 dark:text-white">📝 Notas</h3>
                     </div>
-                    {% endfor %}
+                    <div class="p-4 space-y-3">
+                        <form action="/add/obs" method="POST" class="flex gap-2">
+                            <input type="hidden" name="data" value="{{ data_hoje }}">
+                            <input type="text" name="texto" placeholder="Nova nota..." required 
+                                   class="flex-1 px-4 py-2 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent">
+                            <button type="submit" class="px-4 py-2 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors">💾</button>
+                        </form>
+                        <div class="space-y-2 max-h-64 overflow-y-auto">
+                            {% for o in obs %}
+                            <div class="group flex items-start justify-between gap-3 p-3 bg-slate-50 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-sm transition-shadow">
+                                <p class="text-slate-900 dark:text-white text-sm">{{ o.texto }}</p>
+                                <a href="/delete/obs/{{ o.id }}" onclick="return confirm('Deletar nota?')" class="text-slate-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all">✕</a>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <button class="btn-float" onclick="openModal('modal-tarefa')">+</button>
+    <!-- Floating Action Button -->
+    <button onclick="openModal('modal-tarefa')" title="Adicionar tarefa" 
+            class="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-2xl rounded-full shadow-2xl hover:shadow-3xl transform hover:scale-110 active:scale-95 transition-all duration-200 z-40">
+        ➕
+    </button>
 
-    <div class="modal" id="modal-tarefa">
-        <div class="modal-content">
-            <h3>Nova Atividade</h3>
-            <form action="/add/tarefa" method="POST">
+    <!-- Modal Nova Tarefa -->
+    <div id="modal-tarefa" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full border border-slate-200 dark:border-slate-800 transform transition-all scale-100">
+            <div class="px-6 py-4 bg-gradient-to-r from-primary/10 to-blue-600/10 dark:from-primary/20 dark:to-blue-600/20 border-b border-slate-200 dark:border-slate-800">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">✅ Nova Atividade</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Organize seu dia</p>
+            </div>
+            <form action="/add/tarefa" method="POST" class="p-6 space-y-4">
                 <input type="hidden" name="data" value="{{ data_hoje }}">
-                <input type="text" name="descricao" placeholder="O que precisa ser feito?" required style="width:100%; padding:10px; margin:15px 0;">
-                <select name="periodo" style="width:100%; padding:10px; margin-bottom:15px;">
-                    <option value="Início">Início do Turno</option>
-                    <option value="Meio">Meio do Turno</option>
-                    <option value="Final">Final do Turno</option>
-                </select>
-                <label style="display:block; margin-bottom:15px; font-size:0.9rem;">
-                    <input type="checkbox" name="recorrente" value="1"> 🔁 Repetir diariamente (Rotina Fixa)
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Descrição</label>
+                    <input type="text" name="descricao" placeholder="O que precisa ser feito?" 
+                           class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent" 
+                           required autofocus>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Período</label>
+                    <select name="periodo" 
+                            class="w-full px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent"
+                            required>
+                        <option value="Início">🌅 Início do Turno</option>
+                        <option value="Meio">💼 Meio do Turno</option>
+                        <option value="Final">🌆 Final do Turno</option>
+                    </select>
+                </div>
+                
+                <label class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800 rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
+                    <input type="checkbox" name="recorrente" value="1" 
+                           class="w-5 h-5 accent-primary rounded border-slate-300 cursor-pointer">
+                    <span class="text-sm font-medium text-slate-700 dark:text-slate-300">🔁 Adicionar à rotina fixa</span>
                 </label>
-                <div style="display:flex; gap:10px;">
-                    <button type="submit" style="flex:1; padding:10px; background:#0984e3; color:white; border:none; border-radius:5px;">Salvar</button>
-                    <button type="button" onclick="closeModal('modal-tarefa')" style="flex:1; padding:10px; background:#636e72; color:white; border:none; border-radius:5px;">Cancelar</button>
+                
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold rounded-lg transition-all transform hover:scale-105">
+                        💾 Salvar
+                    </button>
+                    <button type="button" onclick="closeModal('modal-tarefa')" class="flex-1 px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold rounded-lg transition-colors">
+                        Cancelar
+                    </button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="modal" id="modal-global" onclick="if(event.target == this) closeModal('modal-global')">
-        <div class="modal-content" style="width:500px;">
-            <h3>🌎 Atividades Globais</h3>
-            <form action="/add/global" method="POST" style="display:flex; gap:10px; margin:15px 0;">
-                <input type="text" name="descricao" placeholder="Descrição..." required style="flex:2;">
-                <input type="date" name="prazo" style="flex:1;">
-                <button type="submit">Add</button>
-            </form>
-            <div style="max-height: 250px; overflow-y: auto;">
-                {% for g in globais %}
-                <div class="card status-{{ g.status.replace(' ', '-') }}">
-                    <strong>{{ g.descricao }}</strong> <br> <small>Prazo: {{ g.prazo }}</small>
-                    <div style="margin-top:5px;">
-                        <a href="/update/global/{{ g.id }}/Em andamento">🟡</a>
-                        <a href="/update/global/{{ g.id }}/Concluído">🟢</a>
-                        <a href="/delete/global/{{ g.id }}" style="float:right;">🗑️</a>
-                    </div>
-                </div>
-                {% endfor %}
+    <!-- Modal Atividades Globais -->
+    <div id="modal-global" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4" onclick="event.target === this && closeModal('modal-global')">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl max-w-2xl w-full border border-slate-200 dark:border-slate-800 transform transition-all scale-100 max-h-[85vh] overflow-y-auto">
+            <div class="sticky top-0 px-6 py-4 bg-gradient-to-r from-primary/10 to-blue-600/10 dark:from-primary/20 dark:to-blue-600/20 border-b border-slate-200 dark:border-slate-800 z-10">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white">🌎 Atividades Globais</h3>
+                <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">Projetos e objetivos de longo prazo</p>
             </div>
-            <button onclick="closeModal('modal-global')" style="width:100%; margin-top:15px; padding:8px;">Fechar</button>
+
+            <div class="p-6 space-y-4">
+                <form action="/add/global" method="POST" class="flex flex-col sm:flex-row gap-3">
+                    <input type="text" name="descricao" placeholder="Descrição da atividade..." 
+                           class="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-transparent"
+                           required>
+                    <input type="date" name="prazo" 
+                           class="px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white focus:ring-2 focus:ring-primary focus:border-transparent">
+                    <button type="submit" class="px-6 py-2 bg-primary hover:bg-blue-600 text-white font-semibold rounded-lg transition-colors whitespace-nowrap">
+                        Adicionar
+                    </button>
+                </form>
+
+                <div class="space-y-2">
+                    {% for g in globais %}
+                    <div class="group flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 hover:shadow-md transition-shadow">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-semibold text-slate-900 dark:text-white break-words whitespace-normal">{{ g.descricao }}</h4>
+                            <p class="text-sm text-slate-600 dark:text-slate-400 mt-1">
+                                📅 {% if g.prazo %}{{ g.prazo }}{% else %}Sem prazo{% endif %}
+                            </p>
+                        </div>
+                        <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
+                            <a href="/update/global/{{ g.id }}/Em andamento" title="Em andamento" class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors">🟡</a>
+                            <a href="/update/global/{{ g.id }}/Concluído" title="Concluído" class="p-2 hover:bg-white dark:hover:bg-slate-700 rounded-lg transition-colors">🟢</a>
+                            <a href="/delete/global/{{ g.id }}" onclick="return confirm('Tem certeza?')" class="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 rounded-lg transition-colors">🗑️</a>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="flex items-center justify-center h-40 text-center">
+                        <p class="text-slate-500 dark:text-slate-400">Nenhuma atividade global adicionada ainda</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <button onclick="closeModal('modal-global')" class="w-full px-4 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white font-semibold rounded-lg transition-colors">
+                    Fechar
+                </button>
+            </div>
         </div>
     </div>
 
     <script>
+        // Dark mode toggle
         function toggleTheme() {
-            const body = document.body;
-            const newTheme = body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
-            body.setAttribute('data-theme', newTheme);
-            document.getElementById('theme-btn').innerText = newTheme === 'light' ? '🌙' : '☀️';
-            localStorage.setItem('theme', newTheme);
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-btn');
+            
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                btn.textContent = '🌙';
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                btn.textContent = '☀️';
+                localStorage.setItem('theme', 'dark');
+            }
         }
-        if(localStorage.getItem('theme') === 'dark') {
-            document.body.setAttribute('data-theme', 'dark');
-            document.getElementById('theme-btn').innerText = '☀️';
+
+        // Apply saved theme on load
+        document.addEventListener('DOMContentLoaded', function() {
+            const html = document.documentElement;
+            const btn = document.getElementById('theme-btn');
+            const theme = localStorage.getItem('theme') || 'light';
+            
+            if (theme === 'dark') {
+                html.classList.add('dark');
+                btn.textContent = '☀️';
+            } else {
+                html.classList.remove('dark');
+                btn.textContent = '🌙';
+            }
+        });
+
+        // Modal functions
+        function openModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
         }
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+        function closeModal(id) {
+            const modal = document.getElementById(id);
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modal on Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.fixed.inset-0').forEach(m => {
+                    if (!m.classList.contains('hidden')) {
+                        m.classList.add('hidden');
+                    }
+                });
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Auto-hide flash messages
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('[class*="alert-"]');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        });
     </script>
+    
+    <style>
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        .alert-success {
+            @apply px-4 py-3 bg-green-400 dark:bg-green-600 text-white font-semibold rounded-lg shadow-lg;
+        }
+
+        .alert-error {
+            @apply px-4 py-3 bg-red-400 dark:bg-red-600 text-white font-semibold rounded-lg shadow-lg;
+        }
+
+        .alert-info {
+            @apply px-4 py-3 bg-blue-400 dark:bg-blue-600 text-white font-semibold rounded-lg shadow-lg;
+        }
+
+        /* Status colors for cards */
+        [data-status="Pendente"] {
+            @apply border-red-500;
+        }
+
+        [data-status="Em andamento"] {
+            @apply border-amber-500;
+        }
+
+        [data-status="Concluído"] {
+            @apply border-green-500;
+        }
+
+        .border-Pendente-color {
+            @apply border-red-500;
+        }
+
+        .border-Em-andamento-color {
+            @apply border-amber-500;
+        }
+
+        .border-Concluído-color {
+            @apply border-green-500;
+        }
+
+        /* Smooth transitions */
+        * {
+            @apply transition-colors duration-300;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            @apply bg-slate-100 dark:bg-slate-800;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            @apply bg-slate-300 dark:bg-slate-600 rounded-full;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            @apply bg-slate-400 dark:bg-slate-500;
+        }
+    </style>
 </body>
 </html>

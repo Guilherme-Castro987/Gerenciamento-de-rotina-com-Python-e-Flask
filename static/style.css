@@ -1,0 +1,325 @@
+/* 
+  Gerenciamento de Rotina - Complementary Styles
+  Built with Tailwind CSS + Modern Design System
+*/
+
+/* ===== FOUNDATION ===== */
+:root {
+  --primary: #3B82F6;
+  --secondary: #10B981;
+  --accent: #F59E0B;
+  --danger: #EF4444;
+}
+
+* {
+  transition-property: colors;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 300ms;
+}
+
+html, body {
+  scroll-behavior: smooth;
+}
+
+/* ===== SCROLLBAR ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: #475569;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* ===== STATUS COLORS ===== */
+[data-status="Pendente"] {
+  background-color: #fee2e2 !important;
+  border-left-color: #ef4444 !important;
+}
+
+[data-status="Pendente"]:hover {
+  background-color: #fecaca !important;
+}
+
+[data-status="Em andamento"] {
+  background-color: #fef3c7 !important;
+  border-left-color: #f59e0b !important;
+}
+
+[data-status="Em andamento"]:hover {
+  background-color: #fed7aa !important;
+}
+
+[data-status="Concluído"] {
+  background-color: #dcfce7 !important;
+  border-left-color: #22c55e !important;
+}
+
+[data-status="Concluído"]:hover {
+  background-color: #bbf7d0 !important;
+}
+
+/* Dark mode status colors */
+.dark [data-status="Pendente"] {
+  background-color: #7f1d1d !important;
+  border-left-color: #fca5a5 !important;
+}
+
+.dark [data-status="Pendente"]:hover {
+  background-color: #991b1b !important;
+}
+
+.dark [data-status="Em andamento"] {
+  background-color: #78350f !important;
+  border-left-color: #fbbf24 !important;
+}
+
+.dark [data-status="Em andamento"]:hover {
+  background-color: #92400e !important;
+}
+
+.dark [data-status="Concluído"] {
+  background-color: #143f2c !important;
+  border-left-color: #86efac !important;
+}
+
+.dark [data-status="Concluído"]:hover {
+  background-color: #166534 !important;
+}
+
+/* ===== ANIMATIONS ===== */
+@keyframes slideDown {
+  from {
+    transform: translateX(-50%) translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ===== ALERTS & STATUS ===== */
+.alert-success {
+  animation: slideDown 0.3s ease;
+  background: linear-gradient(135deg, #22c55e, #10b981);
+}
+
+.alert-error {
+  animation: slideDown 0.3s ease;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.alert-info {
+  animation: slideDown 0.3s ease;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+/* ===== FORM INPUTS ===== */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="date"],
+select,
+textarea {
+  transition: all 0.2s ease;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  cursor: pointer;
+}
+
+/* ===== TEXT WRAPPING ===== */
+h4, p, span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+/* ===== BUTTONS ===== */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+/* ===== CUSTOM UTILITIES ===== */
+.shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+.shadow-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* ===== BACKDROP BLUR ===== */
+.backdrop-blur-sm {
+  backdrop-filter: blur(4px);
+}
+
+.backdrop-blur {
+  backdrop-filter: blur(12px);
+}
+
+/* ===== GRADIENTS ===== */
+.gradient-to-r {
+  background: linear-gradient(to right, currentColor, currentColor);
+}
+
+.from-primary {
+  --gradient-start-color: #3b82f6;
+}
+
+.to-blue-600 {
+  --gradient-end-color: #2563eb;
+}
+
+/* ===== GROUP HOVER ===== */
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.group:hover .group-hover\:block {
+  display: block;
+}
+
+.group:hover .group-hover\:bg-white {
+  background-color: white;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  body {
+    font-size: 0.9rem;
+  }
+
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 16px; /* Prevent zoom on focus in iOS */
+  }
+}
+
+/* ===== DARK MODE UTILITIES ===== */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+  }
+}
+
+/* ===== ACCESSIBILITY ===== */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ===== FOCUS VISIBLE ===== */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* ===== PRINT STYLES ===== */
+@media print {
+  nav,
+  button,
+  form {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+    color: black;
+  }
+}
+
+

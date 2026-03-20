@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if modo == 'cadastro' %}Cadastro{% else %}Login{% endif %} - Gerenciamento de Rotina</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✅</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 min-h-screen flex items-center justify-center px-4">
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-0 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <div class="relative w-full max-w-md">
+        <!-- Flash Messages -->
+        {% with msgs = get_flashed_messages(with_categories=true) %}
+          {% if msgs %}
+            <div class="mb-6 space-y-2">
+              {% for cat, msg in msgs %}
+                <div class="alert-{{ cat }}">{{ msg }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
+
+        <div class="bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden backdrop-blur-xl bg-opacity-95 dark:bg-opacity-95">
+            <!-- Header -->
+            <div class="px-8 py-12 bg-gradient-to-r from-primary/5 to-secondary/5 dark:from-primary/10 dark:to-secondary/10 border-b border-slate-200 dark:border-slate-800">
+                <div class="text-center">
+                    <h1 class="text-4xl font-bold text-slate-900 dark:text-white mb-2">✅</h1>
+                    <h2 class="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent mb-2">Rotina</h2>
+                    <p class="text-slate-600 dark:text-slate-400 font-medium">
+                        {% if modo == 'cadastro' %}Crie sua conta e comece a organizar sua rotina{% else %}Bem-vindo de volta!{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="px-8 py-8">
+                {% if modo == 'login' %}
+                <form method="POST" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">👤 Usuário</label>
+                        <input type="text" name="username" placeholder="seu_usuario" 
+                               class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               required autofocus>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">🔒 Senha</label>
+                        <input type="password" name="senha" placeholder="sua_senha" 
+                               class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               required>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-primary to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200">
+                        🚀 Entrar
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-slate-600 dark:text-slate-400">
+                        Não tem conta? 
+                        <a href="{{ url_for('register') }}" class="font-bold text-primary hover:text-blue-600 hover:underline">Cadastre-se aqui</a>
+                    </p>
+                </div>
+
+                {% else %}
+                <form method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">👤 Usuário</label>
+                        <input type="text" name="username" placeholder="escolha_um_usuario" 
+                               class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               required autofocus>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">📧 E-mail</label>
+                        <input type="email" name="email" placeholder="seu@email.com" 
+                               class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">🔒 Senha</label>
+                        <input type="password" name="senha" placeholder="mínimo 6 caracteres" 
+                               class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               required>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">🔒 Confirmar Senha</label>
+                        <input type="password" name="confirmar_senha" placeholder="confirme a senha" 
+                               class="w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 rounded-lg text-slate-900 dark:text-white placeholder-slate-500 dark:placeholder-slate-400 focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                               required>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 bg-gradient-to-r from-secondary to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-bold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all duration-200">
+                        ✅ Cadastrar
+                    </button>
+                </form>
+
+                <div class="mt-6 text-center">
+                    <p class="text-slate-600 dark:text-slate-400">
+                        Já tem conta? 
+                        <a href="{{ url_for('login') }}" class="font-bold text-primary hover:text-blue-600 hover:underline">Faça login aqui</a>
+                    </p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <p class="text-center text-slate-500 dark:text-slate-400 text-sm mt-8">
+            © 2026 Gerenciamento de Rotina. Organize seu dia, alcance seus objetivos.
+        </p>
+    </div>
+
+    <script>
+        // Flash message auto-hide
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('[class*="alert-"]');
+            alerts.forEach(alert => {
+                alert.classList.add('px-4', 'py-3', 'text-white', 'font-semibold', 'rounded-lg', 'shadow-lg', 'animate-fade-in');
+                setTimeout(() => {
+                    alert.style.animation = 'fadeOut 0.3s ease forwards';
+                    setTimeout(() => alert.remove(), 300);
+                }, 5000);
+            });
+        });
+    </script>
+
+    <style>
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+        }
+
+        .alert-success {
+            @apply bg-green-500 dark:bg-green-600;
+        }
+
+        .alert-error {
+            @apply bg-red-500 dark:bg-red-600;
+        }
+
+        .alert-info {
+            @apply bg-blue-500 dark:bg-blue-600;
+        }
+    </style>
+</body>
+</html>
